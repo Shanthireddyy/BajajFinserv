@@ -1,15 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-const multer = require('multer');
 const { Buffer } = require('buffer');
 
 // Initialize app
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Middleware
+// Middleware with increased limit for request body
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Set limit to 10MB
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Utility to calculate file size in KB
 const getFileSizeInKB = (base64String) => {
@@ -20,7 +20,6 @@ const getFileSizeInKB = (base64String) => {
 // POST /bfhl route
 app.post('/bfhl', (req, res) => {
     try {
-        console.log("hello");
         const { data, file_b64 } = req.body;
 
         // Define static user data
@@ -55,7 +54,7 @@ app.post('/bfhl', (req, res) => {
                 const buffer = Buffer.from(file_b64, 'base64');
                 file_size_kb = getFileSizeInKB(file_b64);
 
-                // Check for valid MIME type (you can extend this with more MIME types as needed)
+                // Check for valid MIME type
                 file_mime_type = 'application/octet-stream'; // Default binary
                 if (buffer.toString('utf8', 0, 4).startsWith('\x89PNG')) {
                     file_mime_type = 'image/png';
